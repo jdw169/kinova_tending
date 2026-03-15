@@ -1,0 +1,43 @@
+# ==========================================
+# ROS & Catkin Build Files
+# ==========================================
+build/
+devel/
+install/
+.catkin_workspace
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+catkin_generated/
+*.cmake
+
+# ==========================================
+# Python Caches & Compiled Files
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ==========================================
+# ROS Log Files
+# ==========================================
+*.log
+*.ros/
+
+# ==========================================
+# OS & Text Editor Hidden Files
+# ==========================================
+*~
+*.swp
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Project-Specific Exclusions (Optional)
+# ==========================================
+# Add any temporary test G-code files or local notes here
+*.gcode
