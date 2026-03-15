@@ -1,36 +1,30 @@
-Step-by-Step
-Open your terminal:
-
-Bash
-nano ~/catkin_ws/src/kinova_tending/README.md
-Paste the following text:
 
 Markdown
 # Kinova Gen3-Lite 3D Print Tending Workcell
 
-A complete, dynamic ROS Noetic package that bridges a physical 3D printer with a simulated Kinova Gen3-Lite robotic arm. This project creates an automated, context-aware pick-and-place pipeline: when a print finishes on a CR-10S, OctoPrint triggers a MoveIt trajectory to safely extract the finished part using dynamically calculated collision geometries.
+A complete, dynamic ROS Noetic package that bridges a physical 3D printer with a simulated Kinova Gen3-Lite robotic arm. This project creates an automated, pick-and-place pipeline: when a print finishes on a CR-10S, OctoPrint triggers a MoveIt trajectory to safely extract the finished part.
 
 ## 🏗️ System Architecture
 
 This project spans across three distinct layers (Embedded, Network, and Physics):
 
-1. **The Slicer / Firmware:** Custom end G-code (`OCTO99`) contains the exact X, Y, and Z dimensions of the printed part. Klipper firmware is configured to safely bypass this macro.
-2. **The Webhook Bridge:** OctoPrint (via the GCODE System Commands plugin) catches the `OCTO99` command and executes a local bash script (`trigger_ros.sh`). This script packages the dimensions into a JSON payload and POSTs it across the local network.
-3. **The ROS Execution:** A Flask server (`octoprint_listener.py`) receives the HTTP payload and publishes it to a ROS topic. The MoveIt trajectory planner (`kinova_print_tender.py`) catches the trigger, generates a dynamic Cartesian path (avoiding the injected CR-10S bed/gantry collision boxes), and commands the Gazebo simulation to execute the pick-and-place sequence.
+1. **The Slicer / Firmware:** Use Ultmaker slicer. Flash Klipper firmware to the CR-10S 3D printer motherboard and install Klipper on a Raspberry Pi 4B connected to the printer through USB.
+2. **The Webhook Bridge:** OctoPrint even manager executes a local bash script (`trigger_ros.sh`) when a print is finished. A string "print_done" is sent using HTTP POST.
+3. **The ROS Execution:** A Flask server (`octoprint_listener.py`) receives the HTTP data and publishes it to a ROS topic. The MoveIt trajectory planner (`kinova_print_tender.py`) catches the trigger, generates a Cartesian path (avoiding the injected CR-10S bed/gantry collision boxes), and commands the Gazebo simulation to execute the pick-and-place sequence.
 
 ## ⚙️ Prerequisites
 
 * **OS:** Ubuntu 20.04
 * **ROS Version:** ROS 1 Noetic
 * **Robot Packages:** Official `ros-kortex` (Kinova) driver and MoveIt packages.
-* **3D Printer:** OctoPrint installed (Raspberry Pi recommended) with the "GCODE System Commands" plugin.
+* **3D Printer:** OctoPrint installed (Raspberry Pi recommended) alongside Klipper firmware
 
 ## 📥 Installation
 
 **1. Clone the repository into your catkin workspace:**
 ```bash
 cd ~/catkin_ws/src
-git clone <YOUR_GITHUB_REPO_URL> kinova_tending
+git clone https://github.com/jdw169/kinova_tending
 2. Make the Python scripts executable:
 
 Bash
@@ -45,20 +39,12 @@ source devel/setup.bash
 🛠️ Hardware Setup (OctoPrint & Klipper)
 To connect your physical printer to the ROS simulation, configure the following:
 
-Klipper:
-Add a dummy macro to your printer.cfg so the firmware does not halt on the custom trigger:
 
-Plaintext
-[gcode_macro OCTO99]
-gcode:
-    # ROS trigger bypass
 OctoPrint:
 
-Install the GCODE System Commands plugin.
+Setup Octoprint to connect to Klipper firmware through virtual serial port. Refer to Klipper official documentation. 
 
-Add a new command triggered by OCTO99 that points to the provided bash script: /path/to/trigger_ros.sh %(1)s %(2)s %(3)s
-
-Update trigger_ros.sh (found in the /extras folder) with the IP address of your Ubuntu ROS machine.
+Add event trigger in Octoprint event manager. Open Octoprint setting in web interface. Click Event Manager tab and add event. Select print_done event and add system command "~/trigger_ros.sh". Put the "trigger_ros.sh" in your home directory or any directory but remeber to update the path of the command in Octoprint Event Manager.
 
 🚀 Usage
 To launch the full print-tending simulation pipeline, you will need three terminals:
