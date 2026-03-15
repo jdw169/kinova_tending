@@ -36,32 +36,33 @@ Bash
 cd ~/catkin_ws
 catkin_make
 source devel/setup.bash
-🛠️ Hardware Setup (OctoPrint & Klipper)
+**2. 🛠️ Hardware Setup (OctoPrint & Klipper)**
 To connect your physical printer to the ROS simulation, configure the following:
 
+Klipper:
+Download the Klipper firmware from Klipper official repository and flash the 3D printer MCU. Install Klipper main firmware on a Linux computer, Raspberry Pi recommended. 
 
 OctoPrint:
-
+Download and install Octoprint on the same Linux computer. Recommend using the Raspberry Pi Imager to create OctoPi image on the SD card and run it on a Raspberry Pi. 
 Setup Octoprint to connect to Klipper firmware through virtual serial port. Refer to Klipper official documentation. 
-
 Add event trigger in Octoprint event manager. Open Octoprint setting in web interface. Click Event Manager tab and add event. Select print_done event and add system command "~/trigger_ros.sh". Put the "trigger_ros.sh" in your home directory or any directory but remeber to update the path of the command in Octoprint Event Manager.
 
-🚀 Usage
+**3. 🚀 Usage**
 To launch the full print-tending simulation pipeline, you will need three terminals:
 
 Terminal 1: Launch the Kinova Gazebo Simulation
 (Use your standard Kortex Gazebo launch file for the Gen3 Lite)
 
-Bash
+```Bash
 roslaunch kortex_gazebo spawn_kortex_robot.launch robot:=gen3_lite
 Terminal 2: Start the Flask Webhook Server
 
-Bash
+```Bash
 rosrun kinova_tending octoprint_listener.py
 Terminal 3: Start the MoveIt Print Tender Node
 (Note: Must be launched inside the robot's namespace)
 
-Bash
+```Bash
 rosrun kinova_tending kinova_print_tender.py __ns:=my_gen3_lite
 Once all nodes are active and report "Ready", trigger a print finish via OctoPrint (or manually via rostopic pub) to watch the automated pick-and-place sequence!
 
