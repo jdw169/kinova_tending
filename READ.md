@@ -53,16 +53,16 @@ To launch the full print-tending simulation pipeline, you will need three termin
 Terminal 1: Launch the Kinova Gazebo Simulation
 (Use your standard Kortex Gazebo launch file for the Gen3 Lite)
 
-```Bash
+Bash
 roslaunch kortex_gazebo spawn_kortex_robot.launch robot:=gen3_lite
 Terminal 2: Start the Flask Webhook Server
 
-```Bash
+Bash
 rosrun kinova_tending octoprint_listener.py
 Terminal 3: Start the MoveIt Print Tender Node
 (Note: Must be launched inside the robot's namespace)
 
-```Bash
+Bash
 rosrun kinova_tending kinova_print_tender.py __ns:=my_gen3_lite
 Once all nodes are active and report "Ready", trigger a print finish via OctoPrint (or manually via rostopic pub) to watch the automated pick-and-place sequence!
 
