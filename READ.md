@@ -22,7 +22,7 @@ This project spans across three distinct layers (Embedded, Network, and Physics)
 ## 📥 Installation
 
 **1. Clone the repository into your catkin workspace:**
-```bash
+bash
 cd ~/catkin_ws/src
 git clone https://github.com/jdw169/kinova_tending
 2. Make the Python scripts executable:
