@@ -31,8 +31,7 @@ def main():
     rospy.loginfo("ROS Listener Node is active.")
     rospy.loginfo("Starting Flask server. Waiting for OctoPrint...")
     
-    # Run the Flask server. 
-    # host='0.0.0.0' explicitly allows external connections (from the Pi)
+    # Run the Flask server
     app.run(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':

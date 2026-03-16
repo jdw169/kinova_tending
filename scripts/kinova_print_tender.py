@@ -18,8 +18,7 @@ class KinovaPrintTender:
         self.scene = moveit_commander.PlanningSceneInterface()
         self.move_group = moveit_commander.MoveGroupCommander("arm")
 
-        # NOTE: The group name for the Gen3 Lite is typically "arm". 
-        # Verify this matches your MoveIt setup assistant configuration.
+        # Set move group
         self.move_group = moveit_commander.MoveGroupCommander("arm")
         self.gripper_group = moveit_commander.MoveGroupCommander("gripper")
         # Give the scene a second to initialize before adding objects
@@ -55,11 +54,10 @@ class KinovaPrintTender:
             self.pick_and_place()
 
     def operate_gripper(self, state):
-        # 1. Get the active motorized joint
+        # Get the active motorized joint
         motorized_joint = self.gripper_group.get_active_joints()[0]
         
-        # 2. Build a strict dictionary to force MoveIt's formatting
-        # Gen3 Lite ranges from 0.0 (open) to approx 0.96 (tightly closed)
+        # Use dictionary to code clamp open/close
         target_dict = {}
         if state == "opened":
             target_dict[motorized_joint] = 0.96
@@ -68,11 +66,11 @@ class KinovaPrintTender:
             
         rospy.loginfo(f"Commanding {motorized_joint} to: {target_dict[motorized_joint]}")
         
-        # 3. Execute using the dictionary target
+        # Execute using the dictionary target
         self.gripper_group.set_joint_value_target(target_dict)
         success = self.gripper_group.go(wait=True)
         
-        # 4. Stop any residual joint commands
+        # Stop any residual joint commands
         self.gripper_group.stop() 
         
         if success:
@@ -86,10 +84,10 @@ class KinovaPrintTender:
         rospy.loginfo("Starting Pick-and-Place sequence...")
         standby_pose = self.move_group.get_current_pose().pose
 
-        # 1. Ensure gripper is open before approaching
+        # Ensure gripper is open before approaching
         self.operate_gripper("opened")
 
-        # 2. Hover directly over the center of the print bed
+        # Hover directly over the center of the print bed
         target_pose = copy.deepcopy(standby_pose)
         target_pose.position.x = 0.50
         target_pose.position.y = 0.0
@@ -99,32 +97,32 @@ class KinovaPrintTender:
         self.move_group.set_pose_target(target_pose)
         self.move_group.go(wait=True)
 
-        # 3. Dip down to "grab" the printed part
+        # Dip down to grab the printed part
         target_pose.position.z = 0.15 # Lower down toward the bed
         rospy.loginfo("Dipping to grasp height...")
         self.move_group.set_pose_target(target_pose)
         self.move_group.go(wait=True)
 
-        # 4. Close the gripper
+        # Close the gripper
         self.operate_gripper("closed")
 
-        # 5. Lift the part back up
+        # Lift the part back up
         target_pose.position.z = 0.25
         rospy.loginfo("Lifting part...")
         self.move_group.set_pose_target(target_pose)
         self.move_group.go(wait=True)
 
-        # 6. Move to the drop-off zone (off to the left side)
+        # Move to the drop-off zone
         target_pose.position.x = 0.25
         target_pose.position.y = 0.20
         rospy.loginfo("Moving to drop-off zone...")
         self.move_group.set_pose_target(target_pose)
         self.move_group.go(wait=True)
 
-        # 7. Open gripper to drop the part
+        # Open gripper to drop the part
         self.operate_gripper("opened")
 
-        # 8. Return to the Standby Position
+        # Return to the Standby Position
         rospy.loginfo("Returning to standby position...")
         self.move_group.set_pose_target(standby_pose)
         self.move_group.go(wait=True)
